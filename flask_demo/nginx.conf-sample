@@ -1,0 +1,41 @@
+upstream auth {
+    server localhost:8000 max_fails=0;
+}
+
+# Method 1
+server {
+    listen localhost:8000;
+    server_name localhost;
+
+    location / {
+        proxy_pass              https://localhost:5000/auth; # Returns **401** on failure
+        proxy_pass_request_body on;
+        proxy_set_header        Content-Length "";
+        proxy_set_header        X-Original-URI $request_uri;
+    }
+}
+
+server {
+    listen localhost:10081;
+    server_name localhost;
+
+    # ...
+    location / {
+        auth_request    /auth;
+        root /path/to/testsite/;
+        index index.html;
+        location / {
+          try_files $uri $uri/ =404;
+        }
+        error_page 401 = https://localhost:5000/login?redirect_url=$scheme://$server_name:$server_port$request_uri;
+    }
+
+    location /auth {
+        proxy_pass http://auth/;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header X-Original-URL $request_uri;
+        proxy_next_upstream error timeout http_503;
+    }
+    # ...
+}
