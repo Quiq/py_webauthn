@@ -11,6 +11,7 @@ from flask import request
 from flask import session
 from flask import url_for
 from flask_login import LoginManager
+from flask_login import current_user
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
@@ -52,8 +53,26 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('login.html')
 
+@app.route('/auth')
+def auth():
+    if current_user.is_authenticated:
+        return render_template('200.html'), 200
+    else:
+        return render_template('401.html'), 401
+
+@app.route('/login')
+def login():
+    redirect_url = request.args.get('redirect_url')
+    if current_user.is_authenticated and not redirect_url is None:
+        return redirect(redirect_url, code=302)
+
+    return render_template('login.html'), 200
+
+@app.route('/register')
+def register():
+    return render_template('register.html'), 200
 
 @app.route('/webauthn_begin_activate', methods=['POST'])
 def webauthn_begin_activate():

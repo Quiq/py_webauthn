@@ -8,3 +8,4 @@ services:
     volumes:
         - ./webauthn:/app/webauthn:ro
         - ./flask_demo:/app/flask_demo:ro
+        - ./db/webauthn.db:/webauthn.db:rw

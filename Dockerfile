@@ -1,6 +1,7 @@
 FROM python:3-slim
 MAINTAINER Duo Labs https://duo.com/labs
 
+RUN apt update; apt install -y build-essential libssl-dev
 RUN mkdir /app
 COPY flask_demo /app/flask_demo/
 COPY webauthn /app/webauthn/

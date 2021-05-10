@@ -1,0 +1,24 @@
+<html>
+    <script src="{{ url_for('static', filename='js/lib/base64.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/webauthn.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>WebAuthn - Register</title>
+    <body>
+        <h1>WebAuthn - Register</h1>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="flash">{{ message }}</li>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h2>Register</h2>
+        <form id="register-form" name="register" method="get">
+            <label for="register_username">Username:</label>
+            <input name="register_username"></input>
+            <label for="register_display_name">Display Name:</label>
+            <input name="register_display_name"></input>
+            <button id="register" type="submit">Register with WebAuthn</button>
+        </form>
+    </body>
+</html>
