@@ -1,7 +1,10 @@
 version: '2'
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - SQL_DB_URI=${SQL_DB_URI}
     ports:
     - "5000:5000"
     container_name: py_webauthn
