@@ -5,7 +5,8 @@ services:
     ports:
     - "5000:5000"
     container_name: py_webauthn
+    env_file: .env
+    user: nobody
     volumes:
         - ./webauthn:/app/webauthn:ro
         - ./flask_demo:/app/flask_demo:ro
-        - ./db/webauthn.db:/webauthn.db:rw
