@@ -3,6 +3,7 @@ import six
 import string
 import os
 import base64
+import re
 
 CHALLENGE_DEFAULT_BYTE_LEN = 32
 UKEY_DEFAULT_BYTE_LEN = 20
@@ -16,7 +17,8 @@ def validate_username(username):
     if len(username) > USERNAME_MAX_LENGTH:
         return False
 
-    if not username.isalnum():
+    # Allow all email characters
+    if re.match(r'^[A-Za-z0-9\.\@\-]*$', username) is None:
         return False
 
     return True
@@ -29,7 +31,8 @@ def validate_display_name(display_name):
     if len(display_name) > DISPLAY_NAME_MAX_LENGTH:
         return False
 
-    if not display_name.replace(' ', '').isalnum():
+    # Allow all email characters plus spaces
+    if re.match(r'^[A-Za-z0-9\.\@\-\ ]*$', display_name) is None:
         return False
 
     return True
