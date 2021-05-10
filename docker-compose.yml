@@ -5,8 +5,8 @@ services:
       context: .
       args:
         - SQL_DB_URI=${SQL_DB_URI}
-    ports:
-    - "5000:5000"
+      network: host
+    network_mode: host
     container_name: py_webauthn
     env_file: .env
     user: nobody

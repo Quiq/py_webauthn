@@ -3,6 +3,7 @@ from flask_login import UserMixin
 
 
 class User(db.Model, UserMixin):
+    __tablename__ = 'webauthn_users'
     id = db.Column(db.Integer, primary_key=True)
 
     ukey = db.Column(db.String(20), unique=True, nullable=False)
