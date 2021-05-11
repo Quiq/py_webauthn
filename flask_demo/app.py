@@ -183,6 +183,10 @@ def verify_credential_info():
     # to a different user, the Relying Party SHOULD fail this registration
     # ceremony, or it MAY decide to accept the registration, e.g. while deleting
     # the older registration.
+    if sys.version_info >= (3, 0):
+        webauthn_credential.credential_id = str(
+            webauthn_credential.credential_id, "utf-8")
+
     credential_id_exists = User.query.filter_by(
         credential_id=webauthn_credential.credential_id).first()
     if credential_id_exists:
@@ -194,8 +198,6 @@ def verify_credential_info():
     existing_user = User.query.filter_by(username=username).first()
     if not existing_user:
         if sys.version_info >= (3, 0):
-            webauthn_credential.credential_id = str(
-                webauthn_credential.credential_id, "utf-8")
             webauthn_credential.public_key = str(
                 webauthn_credential.public_key, "utf-8")
         user = User(
