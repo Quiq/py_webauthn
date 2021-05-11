@@ -10,6 +10,7 @@ from flask import render_template
 from flask import request
 from flask import session
 from flask import url_for
+from flask import send_from_directory
 from flask_login import LoginManager
 from flask_login import current_user
 from flask_login import login_required
@@ -22,7 +23,7 @@ from db import db
 from context import webauthn
 from models import User
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQL_DB_URI")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 sk = os.environ.get('FLASK_SECRET_KEY')
@@ -31,14 +32,15 @@ db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-RP_ID = 'localhost'
+assets_folder = os.path.join(app.root_path, 'static')
+
+RP_ID = 'awx.quiq.sh'
 RP_NAME = 'webauthn demo localhost'
-ORIGIN = 'https://localhost:5000'
+ORIGIN = 'https://awx.quiq.sh'
 
 # Trust anchors (trusted attestation roots) should be
 # placed in TRUST_ANCHOR_DIR.
 TRUST_ANCHOR_DIR = 'trusted_attestation_roots'
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -49,19 +51,22 @@ def load_user(user_id):
 
     return User.query.get(int(user_id))
 
+@app.route('/webauthn/static/<path:filename>')
+def static(filename):
+    return send_from_directory(assets_folder, filename)
 
-@app.route('/')
+@app.route('/webauthn/')
 def index():
     return render_template('login.html')
 
-@app.route('/auth')
+@app.route('/webauthn/auth')
 def auth():
     if current_user.is_authenticated:
         return render_template('200.html'), 200
     else:
         return render_template('401.html'), 401
 
-@app.route('/login')
+@app.route('/webauthn/login')
 def login():
     redirect_url = request.args.get('redirect_url')
     if current_user.is_authenticated and not redirect_url is None:
@@ -69,11 +74,11 @@ def login():
 
     return render_template('login.html'), 200
 
-@app.route('/register')
+@app.route('/webauthn/register')
 def register():
     return render_template('register.html'), 200
 
-@app.route('/webauthn_begin_activate', methods=['POST'])
+@app.route('/webauthn/begin_activate', methods=['POST'])
 def webauthn_begin_activate():
     # MakeCredentialOptions
     username = request.form.get('register_username')
@@ -114,7 +119,7 @@ def webauthn_begin_activate():
     return jsonify(make_credential_options.registration_dict)
 
 
-@app.route('/webauthn_begin_assertion', methods=['POST'])
+@app.route('/webauthn/begin_assertion', methods=['POST'])
 def webauthn_begin_assertion():
     username = request.form.get('login_username')
 
@@ -146,7 +151,7 @@ def webauthn_begin_assertion():
     return jsonify(webauthn_assertion_options.assertion_dict)
 
 
-@app.route('/verify_credential_info', methods=['POST'])
+@app.route('/webauthn/verify_credential_info', methods=['POST'])
 def verify_credential_info():
     challenge = session['challenge']
     username = session['register_username']
@@ -219,7 +224,7 @@ def verify_credential_info():
     return jsonify({'success': 'User successfully registered.'})
 
 
-@app.route('/verify_assertion', methods=['POST'])
+@app.route('/webauthn/verify_assertion', methods=['POST'])
 def verify_assertion():
     challenge = session.get('challenge')
     assertion_response = request.form
@@ -258,7 +263,7 @@ def verify_assertion():
     })
 
 
-@app.route('/logout')
+@app.route('/webauthn/logout')
 @login_required
 def logout():
     logout_user()
