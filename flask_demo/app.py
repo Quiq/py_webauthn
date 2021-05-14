@@ -17,6 +17,8 @@ from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
 
+from datetime import timedelta
+
 import util
 
 from db import db
@@ -41,6 +43,11 @@ ORIGIN = 'https://awx.quiq.sh'
 # Trust anchors (trusted attestation roots) should be
 # placed in TRUST_ANCHOR_DIR.
 TRUST_ANCHOR_DIR = 'trusted_attestation_roots'
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(hours=12)
 
 @login_manager.user_loader
 def load_user(user_id):
